@@ -216,3 +216,31 @@ y_test = y[i+1:size(x)[1],:]
 
 # gradient descent args desc: x,y,theta,size of the dataset, size of the features, rp, learning rate
 t = gradientDescent(x_train,y_train,theta,size(x_train)[1],size(x_train)[2],0.3,0.001)
+
+#Design and implementation of the classifier;
+function regularised_cost(X, y, θ, λ)
+    m = length(y)
+
+    # Sigmoid predictions at current batch
+    h = sigmoid(X * θ)
+
+    # left side of the cost function
+    positive_class_cost = ((-y)' * log.(h))
+
+    # right side of the cost function
+    negative_class_cost = ((1 .- y)' * log.(1 .- h))
+
+    # lambda effect
+    lambda_regularization = (λ/(2*m) * sum(θ[2 : end] .^ 2))
+
+    # Current batch cost. Basically mean of the batch cost plus regularization penalty
+    𝐉 = (1/m) * (positive_class_cost - negative_class_cost) + lambda_regularization
+
+    # Gradients for all the theta members with regularization except the constant
+    ∇𝐉 = (1/m) * (X') * (h-y) + ((1/m) * (λ * θ))  # suspend all the worker
+
+    ∇𝐉[1] = (1/m) * (X[:, 1])' * (h-y) # Exclude the constant
+
+    return (𝐉, ∇𝐉)
+end
+

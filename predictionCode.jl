@@ -1,0 +1,218 @@
+using DataFrames
+using CSV
+using Statistics
+using StatsBase
+using Plots
+
+df = CSV.read("C:\\Users\\digits\\Documents\\Projects\\Julia_Projects\\bank-additional-full.csv")
+df = convert(Matrix,df)
+
+function cleanData(dataset)
+
+    # loop for cleaning the data
+    for i in 1:size(dataset)[1]
+
+        # job - the field of work for the client(nominal: 12 unique options)
+        if(dataset[i,2] == "housemaid")
+            dataset[i,2] = 1
+        elseif(dataset[i,2] == "services")
+            dataset[i,2] = 2
+        elseif(dataset[i,2] == "admin.")
+            dataset[i,2] = 3
+        elseif(dataset[i,2] == "blue-collar")
+            dataset[i,2] = 4
+        elseif(dataset[i,2] == "technician")
+            dataset[i,2] = 5
+        elseif(dataset[i,2] == "retired")
+            dataset[i,2] = 6
+        elseif(dataset[i,2] == "management")
+            dataset[i,2] = 7
+        elseif(dataset[i,2] == "unemployed")
+            dataset[i,2] = 8
+        elseif(dataset[i,2] == "self-employed")
+            dataset[i,2] = 9
+        elseif(dataset[i,2] == "unknown")
+            dataset[i,2] = 10
+        elseif(dataset[i,2] == "entrepreneur")
+            dataset[i,2] = 11
+        elseif(dataset[i,2] == "student")
+            dataset[i,2] = 12
+        end
+
+        # marital - marital status (nominal: 3 unique options)
+        if(dataset[i,3] == "married")
+            dataset[i,3] = 1
+        elseif(dataset[i,3] == "single")
+            dataset[i,3] = 2
+        elseif(dataset[i,3] == "divorced")
+            dataset[i,3] = 3
+        elseif(dataset[i,3] == "unknown")
+            dataset[i,3] = 4
+        end
+
+        # education - education level of the client (nominal: 8 unique options)
+        if(dataset[i,4] == "basic.4y")
+            dataset[i,4] = 1
+        elseif(dataset[i,4] == "high.school")
+            dataset[i,4] = 2
+        elseif(dataset[i,4] == "basic.6y")
+            dataset[i,4] = 3
+        elseif(dataset[i,4] == "basic.9y")
+            dataset[i,4] = 4
+        elseif(dataset[i,4] == "professional.course")
+            dataset[i,4] = 5
+        elseif(dataset[i,4] == "unknown")
+            dataset[i,4] = 6
+        elseif(dataset[i,4] == "university.degree")
+            dataset[i,4] = 7
+        elseif(dataset[i,4] == "illiterate")
+            dataset[i,4] = 8
+        end
+
+        # default - credit default (nominal: 3 unique options)
+        if(dataset[i,5] == "no")
+            dataset[i,5] = 1
+        elseif(dataset[i,5] == "unknown")
+            dataset[i,5] = 2
+        elseif(dataset[i,5] == "yes")
+            dataset[i,5] = 3
+        end
+
+        # housing - housing loan (nominal: 3 unique options)
+        if(dataset[i,6] == "no")
+            dataset[i,6] = 1
+        elseif(dataset[i,6] == "unknown")
+            dataset[i,6] = 2
+        elseif(dataset[i,6] == "yes")
+            dataset[i,6] = 3
+        end
+
+        # loan - peronal loan (nominal: 3 unique options)
+        if(dataset[i,5] == "no")
+            dataset[i,5] = 1
+        elseif(dataset[i,5] == "unknown")
+            dataset[i,5] = 2
+        elseif(dataset[i,5] == "yes")
+            dataset[i,5] = 3
+        end
+
+        # contact - contact type (binary: telephone or cellular)
+        if(dataset[i,8] == "telephone")
+            dataset[i,8] = 1
+        else
+            dataset[i,8] = 0
+        end
+
+        # month - contact month (nominal: 10 unique options)
+        if(dataset[i,9] == "may")
+            dataset[i,9] = 1
+        elseif(dataset[i,9] == "jun")
+            dataset[i,9] = 2
+        elseif(dataset[i,9] == "jul")
+            dataset[i,9] = 3
+        elseif(dataset[i,9] == "aug")
+            dataset[i,9] = 4
+  	elseif(dataset[i,9] == "oct")
+            dataset[i,9] = 5
+ 	elseif(dataset[i,9] == "nov")
+            dataset[i,9] = 6
+ 	elseif(dataset[i,9] == "dec")
+            dataset[i,9] = 7
+	elseif(dataset[i,9] == "mar")
+            dataset[i,9] = 8
+  	elseif(dataset[i,9] == "apr")
+            dataset[i,9] = 9
+  	elseif(dataset[i,9] == "sep")
+            dataset[i,9] = 10
+        end
+ 
+        # day_of_week - last contact day of the week (nominal: monday to friday)
+        if(dataset[i,10] == "mon")
+            dataset[i,10] = 1
+        elseif(dataset[i,10] == "tue")
+            dataset[i,10] = 2
+        elseif(dataset[i,10] == "wed")
+            dataset[i,10] = 3
+      elseif(dataset[i,10] == "thu")
+            dataset[i,10] = 4
+      elseif(dataset[i,10] == "fri")
+            dataset[i,10] = 5
+        end
+
+        # poutcome - outcome of previouse campaign (nominal: 3 unique options)
+        if(dataset[i,15] == "failure")
+            dataset[i,15] = 1
+        elseif(dataset[i,15] == "success")
+            dataset[i,15] = 2
+        elseif(dataset[i,15] == "nonexistent")
+            dataset[i,15] = 3
+        end
+
+        # y - has the client placed a term deposit (binary: telephone or cellular)
+        if(dataset[i,8] == "Yes")
+            dataset[i,8] = 1
+        else
+            dataset[i,8] = 0
+        end
+
+    end
+
+    # convert from array of any to array of Float64
+    x = convert(Array{Float64},dataset[:,1:21])
+    return (x)
+end
+
+# standardization of the values
+function standardization(x)
+    dt = StatsBase.fit(ZScoreTransform,x,dims=2)
+    return StatsBase.transform(dt,x)
+end
+
+# sigmoid function
+function predict(x, theta)
+    z = theta * x
+    return 1 / (1 + exp(z))
+end
+
+# gradient descent (cost function included)
+function gradientDescent(x,y,theta,m,n,rp,lr)
+    c = 0
+    s = 0
+    for i in 1:m
+        c += -y[i]*log(hypothesis(x[i,:],theta)) - (1 - y[i])*log(1 - hypothesis(x[i,:],theta))
+        for j in 2:n
+            s += (theta[j])^2
+        end
+        s *= rp/(2*m)
+        c *= 1/m
+        c += s
+        theta = theta - lr*(1/m*x[i,:]*(hypothesis(x[i,:],theta)-y[i])+(rp/m)*theta)
+        println("cost: ",c)
+    end
+
+    return theta
+end
+
+
+cd = cleanData(df)
+
+x = cd[1:20]
+x = standardization(x)
+y = cd[21]
+oneMatrix = ones(size(x)[1])
+x = hcat(x,oneMatrix)
+theta = zeros(size(x)[2])
+
+# 80% for training 20% for testing
+i = trunc(Int,(size(x)[1]) * 0.8)
+# training data
+x_train = x[1:i,:]
+y_train = y[1:i,:]
+
+# testing data
+x_test = x[i+1:size(x)[1],:]
+y_test = y[i+1:size(x)[1],:]
+
+
+# gradient descent args desc: x,y,theta,size of the dataset, size of the features, rp, learning rate
+t = gradientDescent(x_train,y_train,theta,size(x_train)[1],size(x_train)[2],0.3,0.001)
